@@ -87,7 +87,7 @@ Route::get('/recent-updates', function() {
 });
 
 // Activity routes
-Route::get('user-activities/{user}', function ($user) {
+Route::get('user-activities/{user}', function (User $user) {
     $activities = Spatie\Activitylog\Models\Activity::with(['causer', 'subject'])
         ->where('causer_id', $user->id)
         ->get();
