@@ -25,15 +25,21 @@ Route::get('/users', function (Request $request) {
     return $query->orderBy('name')->get();
 });
 
-// Auth routes
-Route::post('/register', [App\Http\Controllers\Auth\RegisteredUserController::class, 'store'])
+// Auth routes (JWT)
+Route::post('/register', [App\Http\Controllers\Auth\JWTAuthController::class, 'register'])
     ->name('register');
 
-Route::post('/login', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'store'])
+Route::post('/login', [App\Http\Controllers\Auth\JWTAuthController::class, 'login'])
     ->name('login');
 
-Route::post('/logout', [App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'destroy'])
-    ->name('logout');
+Route::middleware('auth:api')->group(function () {
+    Route::post('/logout', [App\Http\Controllers\Auth\JWTAuthController::class, 'logout'])
+        ->name('logout');
+    Route::post('/refresh', [App\Http\Controllers\Auth\JWTAuthController::class, 'refresh'])
+        ->name('refresh');
+    Route::get('/me', [App\Http\Controllers\Auth\JWTAuthController::class, 'me'])
+        ->name('me');
+});
 
 // Team routes
 Route::post('/team-store', [App\Http\Controllers\TeamController::class, 'store'])
@@ -43,7 +49,7 @@ Route::get('/team-list/{user}', [App\Http\Controllers\TeamController::class, 'in
     ->name('team.index');
 
 Route::post('/team-join', [App\Http\Controllers\TeamController::class, 'join_team'])
-    ->middleware('auth:sanctum')
+    ->middleware('auth:api')
     ->name('team.join');
 
 Route::get('/all-teams', [App\Http\Controllers\TeamController::class, 'all_teams'])
@@ -52,7 +58,7 @@ Route::get('/all-teams', [App\Http\Controllers\TeamController::class, 'all_teams
 Route::delete('/team-delete/{team}', [App\Http\Controllers\TeamController::class, 'destroy'])
     ->name('team.destroy');
 
-Route::post('/add-member/{team}', [App\Http\Controllers\TeamController::class, 'add_member'])->middleware('auth:sanctum');
+Route::post('/add-member/{team}', [App\Http\Controllers\TeamController::class, 'add_member'])->middleware('auth:api');
 Route::delete('/remove-member/{team}', [App\Http\Controllers\TeamController::class, 'remove_member']);
 
 Route::get('/update-progress/{team}', function(Team $team) {
